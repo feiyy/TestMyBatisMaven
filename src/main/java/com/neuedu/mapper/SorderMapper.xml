@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.mapper.SorderMapper" > 
+
+
+<select id="getOrderByIdTwo" parameterType="int" resultMap="_orderdetails2">
+     select *
+     from sorder s
+     where s.oid = #{oid}
+</select>
+
+<select id="getUserByIdTwo" parameterType="int" resultType="Userinfo">
+     select * from userinfo where id = #{id}
+</select>
+
+<select id="getDetailsByOid" parameterType="int" resultMap="_detailsproduct">
+    select * from orderdetails where oid = #{oid}
+</select>  
+
+<select id="getProductByPid" parameterType="int" resultType="Product">
+   select * from product where pid = #{pid}
+</select>
+
+<resultMap type="Orderdetails" id="_detailsproduct">
+   <id column="id" property="id"></id>
+   <result column="price" property="price"/>
+   <result column="pcount" property="pcount"/>
+   <result column="ptotalprice" property="ptotalprice"/>
+   <association property="p" javaType="Product" select="getProductByPid" column="pid"></association>
+</resultMap>
+
+<resultMap type="Sorder" id="_orderdetails2">
+   <id column="oid" property="oid"/>
+   <result column="odate" property="odate"/>
+   <result column="ostatus" property="ostatus"/>
+   <result column="oaddress" property="oaddress"/>
+   <result column="totalprice" property="totalprice"/>
+   <association property="u" javaType="Userinfo" select="getUserByIdTwo" column="userid"></association>
+   <collection property="details" ofType="Orderdetails" select="getDetailsByOid" column="oid"></collection>
+</resultMap>
+
+
+
+<select id="getOrderById" parameterType="int" resultMap="_orderdetails">
+   select s.*, od.id, od.price, od.pcount, p.pid, p.pname, p.pdesc, u.id as uid, u.name 
+	from sorder s, orderdetails od, product p,userinfo u
+	where s.oid = od.oid
+	and od.pid = p.pid
+    and s.userid = u.id
+	and s.oid = #{oid}
+</select>
+
+<resultMap type="Sorder" id="_orderdetails">
+    <id column="oid" property="oid"/>
+    <result column="odate" property="odate"/>
+    <result column="ostatus" property="ostatus"/>
+    <result column="totalprice" property="totalprice"/>
+    <result column="oaddress" property="oaddress"/>  
+    <association property="u" javaType="Userinfo">
+        <id column="uid" property="id"></id>
+        <result column="name" property="name"/>
+    </association>
+    <collection property="details" ofType="Orderdetails" column="oid">
+        <id column="id" property="id"/>
+        <result column="price" property="price"/>
+        <result column="pcount" property="pcount"/>
+        <association property="p" javaType="Product">
+           <id column="pid" property="pid"></id>
+           <result column="pname" property="pname"/>
+           <result column="pdesc" property="pdesc"/>
+        </association>
+    </collection>   
+</resultMap>
+
+<!-- <select id="getOrderById" parameterType="int" resultMap="_orderuser">
+   select u.*, o.*
+	from userinfo u, sorder o
+	where u.id = o.userid
+	and oid = #{oid}
+</select>
+
+<resultMap type="Sorder" id="_orderuser">
+   <id column="oid" property="oid"/>
+   <result column="odate" property="odate"/>
+   <result column="ostatus" property="ostatus"/>
+   <result column="oaddress" property="oaddress"/>
+   <result column="totalprice" property="totalprice"/>
+   <association property="u" javaType="Userinfo" >
+       <id column="id" property="id"/>
+       <result column="name" property="name"/>
+       <result column="sex" property="sex"/>
+       <result column="birthday" property="birthday"/>
+       <result column="sal" property="sal"/>
+   </association>
+</resultMap> -->
+
+</mapper>

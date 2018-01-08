@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.mapper.UserInfoMapper" > 
+
+<cache></cache>
+
+<!-- <select id="getAllUsers" resultType="Userinfo">
+     select * from userinfo
+</select>   -->
+
+<!-- sql片段 -->
+<sql id="getUserSql">
+    select u.*, o.*
+	from userinfo u, sorder o
+	where u.id = o.userid
+</sql>
+
+<select id="getAllUsers" resultMap="_userorder">
+   <include refid="getUserSql" />
+</select>
+
+
+
+<select id="getUserById" parameterType="int" resultMap="_userorder">
+    <include refid="getUserSql" />
+	and u.id = #{id}
+</select>
+
+<resultMap type="Userinfo" id="_userorder">
+    <id column="id" property="id"/>
+    <result column="name" property="name"/>
+    <result column="sex" property="sex"/>
+    <result column="birthday" property="birthday"/>
+    <result column="sal" property="sal"/>
+    <!-- column通常为 order表中的外键列 -->
+    <collection property="orders" ofType="Sorder" column="userid">
+        <id column="oid" property="oid"/>
+        <result column="odate" property="odate"/>
+        <result column="ostatus" property="ostatus"/>
+        <result column="oaddress" property="oaddress"/>
+        <result column="totalprice" property="totalprice"/>
+    </collection>
+</resultMap>
+
+<select id="getUsersByName" parameterType="String" resultType="Userinfo">
+     select * from userinfo where name like "%"#{name}"%"
+</select> 
+
+<select id="getUsersByCondition" parameterType="Userinfo" resultType="Userinfo">
+    select * from userinfo where name = #{name} and sex = #{sex}
+</select>
+
+<select id="getUsersByCondition2" parameterType="java.util.Map" resultType="Userinfo">
+    select * from userinfo where name = #{name} and sex = #{sex}
+</select>
+
+<insert id="addUser" parameterType="Userinfo">
+    insert into userinfo values(null, #{name}, #{sex}, #{birthday},#{sal})
+     <selectKey keyProperty="id" order="AFTER" resultType="int">
+            select LAST_INSERT_ID()
+     </selectKey>
+</insert>
+
+<!-- <update id="updateUser" parameterType="Userinfo">
+    update userinfo set name = #{name}, sex=#{sex}, birthday=#{birthday}, sal=#{sal} where id=#{id}
+</update> -->
+
+<update id="updateUser" parameterType="Userinfo">
+    update userinfo
+    <set>
+         <if test="name!=null and name!=''">
+             name = #{name},
+         </if>
+         <if test="sex!=null and sex!=''">
+             sex = #{sex},
+         </if>
+         <if test="birthday!=null and birthday!=''">
+             birthday = #{birthday},
+         </if>
+         <if test="sal!=0">
+             sal = #{sal},
+         </if>
+    </set>
+     where id = #{id}
+</update>
+
+<delete id="deleteUser" parameterType="int">
+    delete from userinfo where id = #{id}
+</delete>
+
+<select id="getUsers" parameterType="Userinfo" resultType="Userinfo">
+    select * from userinfo 
+    <where>
+        <if test="id!=0">
+           and id = #{id}
+        </if>
+        <if test="name!=null and name!=''">
+           and name = #{name}
+        </if>
+        <if test="sex!=null and sex!=''">
+           and sex = #{sex}
+        </if>
+    </where>
+</select>
+
+<select id="getUsersByIds" resultType="Userinfo">
+    select * from userinfo where id in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+</select>
+
+<select id="getUsersByIdsTwo" resultType="Userinfo">
+    select * from userinfo where id in
+    <foreach collection="array" item="item" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+</select>
+
+<delete id="deleteUsers" parameterType="map">
+   delete from userinfo where name like "%"#{name}"%" or id in
+   <foreach collection="ids" item="item" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+</delete>
+
+
+
+</mapper>

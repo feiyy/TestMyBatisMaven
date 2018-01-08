@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.mapper.EmpMapper" > 
+
+ <sql id="empdeptsql">
+    select e.*, d.dname
+     from emp e, dept d
+     where e.deptno = d.deptno
+ </sql>
+
+ <select id="getAllEmps" resultMap="_empdept">
+     <include refid="empdeptsql"></include>
+ </select>
+ 
+ <resultMap type="Emp" id="_empdept">
+    <id column="empno" property="empno"></id>
+    <result column="ename" property="ename"/>
+    <association property="d" javaType="Dept">
+        <id column="deptno" property="deptno"/>
+        <result column="dname" property="dname"/>
+    </association>
+ </resultMap>
+ 
+ <select id="getAllDepts" resultMap="_deptemp">
+      <include refid="empdeptsql"></include>
+ </select>
+ 
+ <resultMap type="Dept" id="_deptemp">
+     <id column="deptno" property="deptno"/>
+     <result column="dname" property="dname"/>
+     <collection property="emps" ofType="Emp" column="deptno">
+           <id column="empno" property="empno"></id>
+           <result column="ename" property="ename"/>           
+     </collection>
+ </resultMap>
+
+</mapper>
